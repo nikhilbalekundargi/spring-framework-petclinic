@@ -4,3 +4,5 @@ jdk: openjdk8
 script:
   - mvn clean install
   - ls -ltr
+  - cd target
+  - ls -ltr
