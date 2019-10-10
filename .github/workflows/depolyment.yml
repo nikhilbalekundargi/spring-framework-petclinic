@@ -1,0 +1,26 @@
+name: Deploy petclinic
+on:
+  push:
+    branches:    
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        ref: dev
+    - name: build with maven
+      env:
+        AWS_DEFAULT_REGION: "us-east-1"
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      run: |
+        cd admin
+        mvn clean install
+        ls -ltr 
+        version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+        echo "jar version is" $version
+        cd target
+        aws s3 cp s3_trigger-$version.jar s3://test-upload-s3-bucket-vertex/jar/
+        aws s3 ls s3://test-upload-s3-bucket-vertex/jar/
